@@ -17,6 +17,11 @@
             </router-link>
           </li>
           <!-- Add more links as needed -->
+          <li class="mb-2">
+            <router-link to="/employee" class="block p-2 text-gray-700 rounded hover:bg-gray-200">
+              Employee
+            </router-link>
+          </li>
         </ul>
       </nav>
     </aside>
