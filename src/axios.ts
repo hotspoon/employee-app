@@ -1,5 +1,6 @@
 // src/axios.ts
 import axios from 'axios'
+import { redirectToLogin } from './auth'
 import Cookies from 'js-cookie'
 
 const axiosInstance = axios.create({
@@ -17,6 +18,17 @@ axiosInstance.interceptors.request.use(
     return config
   },
   (error) => {
+    return Promise.reject(error)
+  }
+)
+
+// Add a response interceptor to handle 401 errors
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      redirectToLogin()
+    }
     return Promise.reject(error)
   }
 )

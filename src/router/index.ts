@@ -2,10 +2,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 // import AboutView from '../views/AboutView.vue'
+// import AddEmployeeView from '../views/AddEmployeeView.vue'
 import LoginView from '../views/LoginView.vue'
 import MainLayout from '../layouts/MainLayout.vue'
 import AuthLayout from '../layouts/AuthLayout.vue'
 import { isLoggedIn } from '../auth'
+import AddEmployeeView from '@/views/AddEmployeeView.vue'
 
 const routes = [
   {
@@ -31,6 +33,12 @@ const routes = [
         // this generates a separate chunk (About.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
         component: () => import('../views/AboutView.vue')
+      },
+      {
+        // add-employee
+        path: 'add-employee',
+        name: 'add-employee',
+        component: AddEmployeeView
       }
     ]
   },

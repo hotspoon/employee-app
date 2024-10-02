@@ -1,4 +1,3 @@
-<!-- src/views/LoginView.vue -->
 <template>
   <div class="flex items-center justify-center min-h-screen bg-gray-100">
     <div class="w-full max-w-md p-8 space-y-6 bg-white rounded shadow-md">
@@ -24,9 +23,11 @@
         </div>
         <button
           type="submit"
+          :disabled="loading"
           class="w-full px-4 py-2 font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:ring focus:ring-blue-300"
         >
-          Login
+          <span v-if="loading" class="loader"></span>
+          <span v-else>Login</span>
         </button>
       </form>
     </div>
@@ -44,9 +45,11 @@ export default defineComponent({
   setup() {
     const email = ref('')
     const password = ref('')
+    const loading = ref(false)
     const router = useRouter()
 
     const login = async () => {
+      loading.value = true
       try {
         const response = await axiosInstance.post('/auth/login', {
           email: email.value,
@@ -66,14 +69,39 @@ export default defineComponent({
         console.error(error)
         // Handle login error
         alert('Login failed. Please check your email and password.')
+      } finally {
+        loading.value = false
       }
     }
 
     return {
       email,
       password,
+      loading,
       login
     }
   }
 })
 </script>
+
+<style scoped>
+.loader {
+  border: 2px solid #f3f3f3; /* Light grey */
+  border-top: 2px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 2s linear infinite;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+</style>
