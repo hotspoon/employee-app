@@ -52,10 +52,15 @@ export default defineComponent({
           email: email.value,
           password: password.value
         })
-        console.log(response)
+
         const token = response.data.data.token
-        Cookies.set('token', token, { expires: 7 })
-        Cookies.set('user', JSON.stringify(response.data.data.user_data), { expires: 7 })
+        const expiresIn = response.data.data.expires_in
+        const expirationDate = new Date(new Date().getTime() + expiresIn * 1000)
+        Cookies.set('token', token, { expires: expirationDate })
+        Cookies.set('expiresIn', expiresIn, { expires: expirationDate })
+        Cookies.set('user', JSON.stringify(response.data.data.user_data), {
+          expires: expirationDate
+        })
         router.push('/')
       } catch (error) {
         console.error(error)
