@@ -16,21 +16,23 @@
           single-line
         ></v-text-field>
       </template>
-      <v-data-table
-        :items="employees"
-        v-model:options="options"
-        :server-items-length="totalEmployees"
-        :loading="loading"
-        class="elevation-1"
-        @update:options="fetchEmployee"
-      >
-        <template v-slot:[`item.actions`]="{ item }">
-          <div class="icon-container">
-            <v-icon small @click="editEmployee(item)">mdi-pencil</v-icon>
-            <v-icon small @click="deleteEmployee(item)">mdi-delete</v-icon>
-          </div>
-        </template>
-      </v-data-table>
+      <div class="table-container">
+        <v-data-table :headers="headers" :items="employees" :search="search">
+          <template v-slot:[`item.status`]="{ item }">
+            <v-chip v-if="item.status === 'active'" color="green"> Active </v-chip>
+            <v-chip v-else-if="item.status === 'inactive'" color="red"> Inactive </v-chip>
+            <v-chip v-else color="grey" variant="flat">
+              {{ item.status }}
+            </v-chip>
+          </template>
+          <template v-slot:[`item.actions`]="{ item }">
+            <div class="icon-container">
+              <v-icon small class="mr-2" @click="editEmployee(item)"> mdi-pencil </v-icon>
+              <v-icon small @click="deleteEmployee(item)"> mdi-delete </v-icon>
+            </div>
+          </template>
+        </v-data-table>
+      </div>
     </v-card>
   </v-container>
 </template>
@@ -58,6 +60,19 @@ export default defineComponent({
       multiSort: false,
       mustSort: false
     })
+
+    const headers = ref([
+      { text: 'Name', value: 'name' },
+      { text: 'Gender', value: 'gender' },
+      { text: 'Email', value: 'email' },
+      { text: 'Phone', value: 'phone' },
+      { text: 'Date of Birth', value: 'date_of_birth' },
+      { text: 'Address', value: 'address', width: '300px' }, // Adjust the width as needed
+      { text: 'Department', value: 'departement' },
+      { text: 'Position', value: 'position' },
+      { text: 'Status', value: 'status' },
+      { text: 'Actions', value: 'actions', sortable: false }
+    ])
 
     const router = useRouter()
 
@@ -127,6 +142,7 @@ export default defineComponent({
       totalEmployees,
       loading,
       options,
+      headers,
       navigateToAddEmployee,
       fetchEmployee,
       editEmployee,
@@ -137,6 +153,10 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.table-container {
+  overflow-x: auto;
+}
+
 .icon-container {
   display: flex;
   gap: 8px; /* Adjust the gap as needed */
