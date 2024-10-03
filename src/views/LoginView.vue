@@ -21,7 +21,13 @@
             class="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
           />
         </div>
-        <v-btn type="submit" :disabled="loading" class="w-full px-4 py-2" color="primary">
+        <v-btn
+          type="submit"
+          :disabled="loading"
+          class="w-full px-4 py-2"
+          color="primary"
+          data-testid="btn-submit"
+        >
           <span v-if="loading" class="loader"></span>
           <span v-else>Login</span>
         </v-btn>
