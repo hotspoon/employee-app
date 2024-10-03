@@ -22,6 +22,7 @@
       <v-app-bar-nav-icon @click="toggleSidebar"></v-app-bar-nav-icon>
       <v-toolbar-title>Main Header</v-toolbar-title>
       <v-spacer></v-spacer>
+      <div class="mr-4">Hi, {{ userName }}</div>
       <v-btn @click="logout" color="primary" dark>Logout</v-btn>
     </v-app-bar>
 
@@ -34,7 +35,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
 import axiosInstance from '../axios'
 import Cookies from 'js-cookie'
 import { useRouter } from 'vue-router'
@@ -44,6 +45,15 @@ export default defineComponent({
   setup() {
     const router = useRouter()
     const isSidebarOpen = ref(true) // Sidebar is open by default
+    const userName = ref('')
+
+    onMounted(() => {
+      const userCookie = Cookies.get('user')
+      if (userCookie) {
+        const user = JSON.parse(userCookie)
+        userName.value = user.name || 'User'
+      }
+    })
 
     const toggleSidebar = () => {
       isSidebarOpen.value = !isSidebarOpen.value
@@ -65,7 +75,8 @@ export default defineComponent({
     return {
       isSidebarOpen,
       toggleSidebar,
-      logout
+      logout,
+      userName
     }
   }
 })
