@@ -21,6 +21,7 @@
             class="w-full px-3 py-2 mt-1 border rounded-md shadow-sm focus:outline-none focus:ring focus:border-blue-300"
           />
         </div>
+        <input type="hidden" v-model="csrfToken" />
         <v-btn
           type="submit"
           :disabled="loading"
@@ -37,10 +38,11 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
+import { defineComponent, ref, onMounted } from 'vue'
 import axiosInstance from '../axios'
 import Cookies from 'js-cookie'
 import { useRouter } from 'vue-router'
+import { generateCsrfToken, getCsrfToken } from '../lib/csrf'
 
 export default defineComponent({
   name: 'LoginView',
@@ -48,29 +50,63 @@ export default defineComponent({
     const email = ref('')
     const password = ref('')
     const loading = ref(false)
+    const csrfToken = ref('')
     const router = useRouter()
+
+    const isProduction = import.meta.env.PROD
+
+    onMounted(() => {
+      if (!getCsrfToken()) {
+        csrfToken.value = generateCsrfToken()
+      } else {
+        csrfToken.value = getCsrfToken()
+      }
+    })
 
     const login = async () => {
       loading.value = true
       try {
+        const storedCsrfToken = getCsrfToken()
+        if (csrfToken.value !== storedCsrfToken) {
+          throw new Error('CSRF token mismatch')
+        }
+
         const response = await axiosInstance.post('/auth/login', {
           email: email.value,
-          password: password.value
+          password: password.value,
+          _csrf: csrfToken.value
         })
 
         const token = response.data.data.token
         const expiresIn = response.data.data.expires_in
         const expirationDate = new Date(new Date().getTime() + expiresIn * 1000)
-        Cookies.set('token', token, { expires: expirationDate })
-        Cookies.set('expiresIn', expiresIn, { expires: expirationDate })
+        Cookies.set('token', token, {
+          expires: expirationDate,
+          secure: isProduction,
+          sameSite: 'Strict',
+          httpOnly: isProduction
+        })
+        Cookies.set('expiresIn', expiresIn, {
+          expires: expirationDate,
+          secure: isProduction,
+          sameSite: 'Strict',
+          httpOnly: isProduction
+        })
         Cookies.set('user', JSON.stringify(response.data.data.user_data), {
-          expires: expirationDate
+          expires: expirationDate,
+          secure: isProduction,
+          sameSite: 'Strict',
+          httpOnly: isProduction
         })
         router.push('/')
       } catch (error) {
         console.error(error)
         // Handle login error
-        alert('Login failed. Please check your email and password.')
+        if (error.message === 'CSRF token mismatch') {
+          alert('CSRF token mismatch. Please refresh the page and try again.')
+        } else {
+          alert('Login failed. Please check your email and password.')
+        }
       } finally {
         loading.value = false
       }
@@ -80,6 +116,7 @@ export default defineComponent({
       email,
       password,
       loading,
+      csrfToken,
       login
     }
   }
