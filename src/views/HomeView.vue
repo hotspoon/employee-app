@@ -27,8 +27,12 @@
           </template>
           <template v-slot:[`item.actions`]="{ item }">
             <div class="icon-container">
-              <v-icon small class="mr-2" @click="editEmployee(item)"> mdi-pencil </v-icon>
-              <v-icon small @click="deleteEmployee(item)"> mdi-delete </v-icon>
+              <v-icon small class="mr-2" @click="editEmployee(item)" color="primary" title="Edit">
+                mdi-pencil
+              </v-icon>
+              <v-icon small @click="deleteEmployee(item)" color="red" title="Hapus">
+                mdi-delete
+              </v-icon>
             </div>
           </template>
         </v-data-table>
@@ -60,18 +64,17 @@ export default defineComponent({
       multiSort: false,
       mustSort: false
     })
-
     const headers = ref([
-      { text: 'Name', value: 'name' },
-      { text: 'Gender', value: 'gender' },
-      { text: 'Email', value: 'email' },
-      { text: 'Phone', value: 'phone' },
-      { text: 'Date of Birth', value: 'date_of_birth' },
-      { text: 'Address', value: 'address', width: '300px' }, // Adjust the width as needed
-      { text: 'Department', value: 'departement' },
-      { text: 'Position', value: 'position' },
-      { text: 'Status', value: 'status' },
-      { text: 'Actions', value: 'actions', sortable: false }
+      { title: 'Name', key: 'name', align: 'start' as const },
+      { title: 'Gender', key: 'gender', align: 'start' as const },
+      { title: 'Email', key: 'email', align: 'start' as const },
+      { title: 'Phone', key: 'phone', align: 'start' as const },
+      { title: 'Date of Birth', key: 'date_of_birth', align: 'start' as const },
+      { title: 'Address', key: 'address', align: 'start' as const, width: '300px' }, // Adjust the width as needed
+      { title: 'Department', key: 'departement', align: 'start' as const },
+      { title: 'Position', key: 'position', align: 'start' as const },
+      { title: 'Status', key: 'status', align: 'start' as const },
+      { title: 'Actions', key: 'actions', align: 'center' as const, sortable: false }
     ])
 
     const router = useRouter()
@@ -100,15 +103,20 @@ export default defineComponent({
     }
 
     const editEmployee = (employee: Employee) => {
-      router.push({ name: 'edit-employee', params: { id: employee.id } })
+      const encodedName = encodeURIComponent(employee.name)
+      router.push(`/edit-employee/${employee.id}?name=${encodedName}`)
     }
-
     const deleteEmployee = async (employee: Employee) => {
       if (confirm(`Are you sure you want to delete ${employee.name}?`)) {
         try {
-          await axiosInstance.delete(`/employee/${employee.id}`)
+          await axiosInstance.delete('/employee', {
+            data: {
+              id: employee.id
+            }
+          })
           fetchEmployee()
         } catch (error) {
+          alert(`Failed to delete employee ${employee.name}`)
           console.error('Error deleting employee:', error)
         }
       }
@@ -155,6 +163,7 @@ export default defineComponent({
 <style scoped>
 .table-container {
   overflow-x: auto;
+  white-space: nowrap;
 }
 
 .icon-container {

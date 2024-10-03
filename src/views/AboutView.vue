@@ -35,7 +35,9 @@
   </v-data-table-server>
 </template>
 
-<script>
+<script lang="ts">
+import { defineComponent, ref, watch, onMounted } from 'vue'
+
 const desserts = [
   {
     name: 'Frozen Yogurt',
@@ -155,10 +157,11 @@ const FakeAPI = {
   }
 }
 
-export default {
-  data: () => ({
-    itemsPerPage: 5,
-    headers: [
+export default defineComponent({
+  name: 'AboutView',
+  setup() {
+    const itemsPerPage = ref(5)
+    const headers = ref([
       {
         title: 'Dessert (100g serving)',
         align: 'start',
@@ -170,36 +173,47 @@ export default {
       { title: 'Carbs (g)', key: 'carbs', align: 'end' },
       { title: 'Protein (g)', key: 'protein', align: 'end' },
       { title: 'Iron (%)', key: 'iron', align: 'end' }
-    ],
-    serverItems: [],
-    loading: true,
-    totalItems: 0,
-    name: '',
-    calories: '',
-    search: ''
-  }),
-  watch: {
-    name() {
-      this.search = String(Date.now())
-    },
-    calories() {
-      this.search = String(Date.now())
-    }
-  },
-  methods: {
-    loadItems({ page, itemsPerPage, sortBy }) {
-      this.loading = true
+    ]) as any
+    const serverItems = ref([])
+    const loading = ref(true)
+    const totalItems = ref(0)
+    const name = ref('')
+    const calories = ref('')
+    const search = ref('')
+
+    const loadItems = ({ page, itemsPerPage, sortBy }) => {
+      loading.value = true
       FakeAPI.fetch({
         page,
         itemsPerPage,
         sortBy,
-        search: { name: this.name, calories: this.calories }
-      }).then(({ items, total }) => {
-        this.serverItems = items
-        this.totalItems = total
-        this.loading = false
+        search: { name: name.value, calories: calories.value }
+      }).then(({ items, total }: any) => {
+        serverItems.value = items
+        totalItems.value = total
+        loading.value = false
       })
     }
+
+    watch([name, calories], () => {
+      search.value = String(Date.now())
+    })
+
+    onMounted(() => {
+      loadItems({ page: 1, itemsPerPage: itemsPerPage.value, sortBy: [] })
+    })
+
+    return {
+      itemsPerPage,
+      headers,
+      serverItems,
+      loading,
+      totalItems,
+      name,
+      calories,
+      search,
+      loadItems
+    }
   }
-}
+})
 </script>

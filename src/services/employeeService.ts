@@ -21,6 +21,16 @@ export const getEmployeeById = async (id: string) => {
   }
 }
 
+export const getEmployeeByName = async (name: string) => {
+  try {
+    const response = await axiosInstance.get(`/employee?search=${name}`)
+    return response.data
+  } catch (error) {
+    console.error(`Error fetching employee with name ${name}:`, error)
+    throw error
+  }
+}
+
 export const addEmployee = async (employeeData: {
   name: string
   email: string
@@ -37,19 +47,17 @@ export const addEmployee = async (employeeData: {
 
 export const updateEmployee = async (id: string, employeeData: any) => {
   try {
-    const response = await axiosInstance.put(`/employee`, employeeData)
+    const response = await axiosInstance.put(`/employee/${id}`, employeeData)
     return response.data
   } catch (error) {
-    console.error(`Error updating employee with id ${employeeData.id}:`, error)
+    console.error(`Error updating employee with id ${id}:`, error)
     throw error
   }
 }
 
 export const deleteEmployee = async (id: string) => {
   try {
-    const response = await axiosInstance.delete(`/employee`, {
-      id: id
-    })
+    const response = await axiosInstance.delete(`/employee/${id}`)
     return response.data
   } catch (error) {
     console.error(`Error deleting employee with id ${id}:`, error)
