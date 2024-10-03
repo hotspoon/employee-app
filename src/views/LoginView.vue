@@ -47,10 +47,10 @@ import { generateCsrfToken, getCsrfToken } from '../lib/csrf'
 export default defineComponent({
   name: 'LoginView',
   setup() {
-    const email = ref('')
-    const password = ref('')
-    const loading = ref(false)
-    const csrfToken = ref('')
+    const email = ref<string>('')
+    const password = ref<string>('')
+    const loading = ref<boolean>(false)
+    const csrfToken = ref<string | undefined>('')
     const router = useRouter()
 
     const isProduction = import.meta.env.PROD
@@ -99,7 +99,7 @@ export default defineComponent({
           httpOnly: isProduction
         })
         router.push('/')
-      } catch (error) {
+      } catch (error: any) {
         console.error(error)
         // Handle login error
         if (error.message === 'CSRF token mismatch') {
