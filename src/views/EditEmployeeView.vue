@@ -166,6 +166,7 @@ export default defineComponent({
       loading.value = true
       try {
         const payload = {
+          id: Number(id),
           name: name.value,
           gender: gender.value,
           email: email.value,
@@ -175,8 +176,8 @@ export default defineComponent({
           department_id: department_id.value,
           job_position_id: job_position_id.value
         }
-        console.log(payload)
-        const response = await updateEmployee(id, payload)
+
+        const response = await updateEmployee(payload)
         console.log('Employee updated:', response.data)
         alert('Employee updated successfully!')
         // redirect to home page
@@ -193,9 +194,8 @@ export default defineComponent({
       router.push('/')
     }
 
-    onMounted(() => {
-      fetchDepartments()
-      fetchJobPositions()
+    onMounted(async () => {
+      await Promise.allSettled([fetchDepartments(), fetchJobPositions()])
       fetchEmployee()
     })
 

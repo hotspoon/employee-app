@@ -6,18 +6,27 @@
     </v-card-title>
 
     <v-card>
-      <template v-slot:text>
-        <v-text-field
-          v-model="search"
-          label="Search"
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          hide-details
-          single-line
-        ></v-text-field>
-      </template>
+      <v-text-field
+        v-model="search"
+        label="Search"
+        prepend-inner-icon="mdi-magnify"
+        variant="outlined"
+        hide-details
+        single-line
+        class="ma-4"
+        @input="onSearchInput"
+      ></v-text-field>
       <div class="table-container">
-        <v-data-table :headers="headers" :items="employees" :search="search">
+        <v-data-table-server
+          :headers="headers"
+          :items="employees"
+          :items-per-page="options.itemsPerPage"
+          :loading="loading"
+          :server-items-length="totalEmployees"
+          :items-length="totalEmployees"
+          :search="search"
+          @update:options="updateOptions"
+        >
           <template v-slot:[`item.status`]="{ item }">
             <v-chip v-if="item.status === 'active'" color="green"> Active </v-chip>
             <v-chip v-else-if="item.status === 'inactive'" color="red"> Inactive </v-chip>
@@ -35,7 +44,7 @@
               </v-icon>
             </div>
           </template>
-        </v-data-table>
+        </v-data-table-server>
       </div>
     </v-card>
   </v-container>
@@ -45,6 +54,7 @@
 import { defineComponent, ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axiosInstance from '../axios'
+import debounce from 'lodash/debounce'
 import type { EmployeeResponse, Employee } from '../types/employee'
 
 export default defineComponent({
@@ -86,7 +96,7 @@ export default defineComponent({
           params: {
             page: options.value.page,
             limit: options.value.itemsPerPage,
-            search: search.value
+            search: search.value || undefined
           }
         })
         employees.value = response.data.data.list
@@ -96,6 +106,12 @@ export default defineComponent({
       } finally {
         loading.value = false
       }
+    }
+
+    const debouncedFetchEmployee = debounce(fetchEmployee, 1000)
+
+    const onSearchInput = () => {
+      debouncedFetchEmployee()
     }
 
     const navigateToAddEmployee = () => {
@@ -122,26 +138,25 @@ export default defineComponent({
       }
     }
 
+    const updateOptions = (newOptions) => {
+      options.value = { ...options.value, ...newOptions }
+    }
+
     onMounted(() => {
       fetchEmployee()
     })
 
     watch(
-      () => options.value.page,
-      (newPage, oldPage) => {
-        if (newPage !== oldPage) {
+      () => options.value,
+      (newOptions, oldOptions) => {
+        if (
+          newOptions.page !== oldOptions.page ||
+          newOptions.itemsPerPage !== oldOptions.itemsPerPage
+        ) {
           fetchEmployee()
         }
-      }
-    )
-
-    watch(
-      () => options.value.itemsPerPage,
-      (newLimit, oldLimit) => {
-        if (newLimit !== oldLimit) {
-          fetchEmployee()
-        }
-      }
+      },
+      { deep: true }
     )
 
     return {
@@ -154,7 +169,9 @@ export default defineComponent({
       navigateToAddEmployee,
       fetchEmployee,
       editEmployee,
-      deleteEmployee
+      deleteEmployee,
+      onSearchInput,
+      updateOptions
     }
   }
 })
@@ -168,6 +185,6 @@ export default defineComponent({
 
 .icon-container {
   display: flex;
-  gap: 8px; /* Adjust the gap as needed */
+  gap: 8px;
 }
 </style>
