@@ -53,8 +53,6 @@ export default defineComponent({
     const csrfToken = ref<string | undefined>('')
     const router = useRouter()
 
-    const isProduction = false
-
     onMounted(() => {
       if (!getCsrfToken()) {
         csrfToken.value = generateCsrfToken()
@@ -82,21 +80,15 @@ export default defineComponent({
         const expirationDate = new Date(new Date().getTime() + expiresIn * 1000)
         Cookies.set('token', token, {
           expires: expirationDate,
-          secure: isProduction,
-          sameSite: 'Strict',
-          httpOnly: true
+          sameSite: 'Strict'
         })
         Cookies.set('expiresIn', expiresIn, {
           expires: expirationDate,
-          secure: isProduction,
-          sameSite: 'Strict',
-          httpOnly: true
+          sameSite: 'Strict'
         })
         Cookies.set('user', JSON.stringify(response.data.data.user_data), {
           expires: expirationDate,
-          secure: isProduction,
-          sameSite: 'Strict',
-          httpOnly: true
+          sameSite: 'Strict'
         })
         router.push('/')
       } catch (error: any) {
