@@ -84,19 +84,19 @@ export default defineComponent({
           expires: expirationDate,
           secure: isProduction,
           sameSite: 'Strict',
-          httpOnly: isProduction
+          httpOnly: true
         })
         Cookies.set('expiresIn', expiresIn, {
           expires: expirationDate,
           secure: isProduction,
           sameSite: 'Strict',
-          httpOnly: isProduction
+          httpOnly: true
         })
         Cookies.set('user', JSON.stringify(response.data.data.user_data), {
           expires: expirationDate,
           secure: isProduction,
           sameSite: 'Strict',
-          httpOnly: isProduction
+          httpOnly: true
         })
         router.push('/')
       } catch (error: any) {
