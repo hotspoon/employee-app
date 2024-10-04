@@ -53,7 +53,7 @@ export default defineComponent({
     const csrfToken = ref<string | undefined>('')
     const router = useRouter()
 
-    const isProduction = import.meta.env.PROD
+    const isProduction = false
 
     onMounted(() => {
       if (!getCsrfToken()) {
